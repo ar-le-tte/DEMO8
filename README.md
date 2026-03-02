@@ -115,4 +115,40 @@ A detailed learner table including:
 - Average Attendance %
 - Average Score
 
+---
+## Data Rules & Preparation
+
+### Attendance Rule
+A learner is marked as **Attended = 1** if:
+- **Minutes in Zoom session > 30**
+
+This rule is applied before computing attendance rates and summaries.
+
+### Data Shaping (recommended)
+Data is loaded from the `data/` directory and cleaned into analysis-ready tables:
+- Standardize learner identifier (use **email** consistently)
+- Ensure dates are proper `Date` type
+- Create a single assessment table by stacking labs + quizzes:
+  - `email, cohort, track, week, assessment type, score`
+
+---
+
+## Data Model
+The report is modeled using a star-schema approach:
+
+**Dimensions**
+- `Learners` (email, learner name, cohort, track)
+- `Calendar Table` (Date, Month, Week, etc.)
+
+**Facts**
+- `Zoom Attendance`
+- `Participation`
+- `Assessments` (Labs + Quizzes combined)
+- `Status` (Graduation + Certification)
+
+**Relationships**
+- `Learners[email]` → each fact table `[email]`
+- `Calendar Table[Date]` → attendance/participation `[Date]`
+- `Calendar Table[Week]` → assessments `[Week]` 
+---
 
