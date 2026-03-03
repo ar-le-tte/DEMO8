@@ -152,3 +152,112 @@ The report is modeled using a star-schema approach:
 - `Calendar Table[Week]` → assessments `[Week]` 
 ---
 
+## Key DAX Calculations
+
+### Total Learners
+
+```DAX
+Total Learners = DISTINCTCOUNT(Learners[email])
+```
+
+
+### Total Graduate
+
+```DAX
+Total Graduations = 
+CALCULATE(
+    COUNTROWS('Status of Participant'),
+    'Status of Participant'[Graduation Status] = "Graduate"
+)
+```
+
+### Graduation Rate
+
+```DAX
+Graduation Rate % = COALESCE(
+DIVIDE(
+    [Total Graduations],
+    [Total Learners],
+    0
+), 0)
+```
+
+### Total Certified
+
+```DAX
+Total Certifications = 
+CALCULATE(
+    COUNTROWS('Status of Participant'),
+    'Status of Participant'[Certification Status] = "Certified"
+)
+```
+
+### Certification Rate
+
+```DAX
+Certification Rate % = COALESCE(
+DIVIDE(
+    [Total Certifications],
+    [Total Learners],
+    0
+), 0) 
+```
+### Dropout Rate
+```DAX
+Total Dropouts = 
+COALESCE(CALCULATE(
+    COUNTROWS('Status of Participant'),
+    'Status of Participant'[Graduation Status] = "Non Graduate"
+), 0)
+```
+```DAX
+Dropout Rate % = 
+DIVIDE(
+    [Total Dropouts],
+    [Total Learners],
+    0
+) 
+```
+
+### Attendance Rate
+```DAX
+Learner Attendance % = 
+VAR SessionsHeld =
+    CALCULATE(
+        DISTINCTCOUNT('Zoom Attendance'[Date]),
+        REMOVEFILTERS('Zoom Attendance'[Email])
+    )
+VAR SessionsAttended =
+    CALCULATE(
+        DISTINCTCOUNT('Zoom Attendance'[Date]),
+        'Zoom Attendance'[Attended] = 1
+    )
+RETURN
+    DIVIDE(SessionsAttended, SessionsHeld)
+```DAX
+```DAX
+Average Attendance % = COALESCE(
+AVERAGEX(
+    VALUES(Learners[email]),
+    [Learner Attendance %]
+), 0)
+```
+
+
+---
+## How to Use
+
+1. Open the `.pbix` inside Dashboard/
+2. If data paths are broken, update them to point to your local data/ folder
+3. Refresh the model
+4. Use slicers to filter by cohort/track/week and explore:
+    - engagement patterns
+    - assessment performance
+    - graduation/certification outcomes
+
+
+## Tools Used
+
+* Power BI Desktop
+* Power Query
+* Custom JSON Theme
